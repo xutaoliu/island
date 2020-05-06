@@ -1,0 +1,12 @@
+django==3.0.5
+djangorestframework==3.11.0
+drf-jwt==1.15.2
+twint==2.1.18
+requests[socks]==2.23.0
+django-filter==2.2.0
+mysqlclient==1.4.6
+Pillow==7.1.1
+wechatpy[cryptography]==1.8.13
+django-redis==4.11.0
+pika==1.1.0
+celery==4.4.2

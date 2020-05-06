@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+  island:
+    image: missingno/island
+    volumes:
+      - ./log:/app/log
+      - ./media:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+    env_file:
+      # See example.env
+      - test.env
+# Uncomment the following line to make migrations
+#    entrypoint: "python manage.py makemigrations"
+
+  mysql:
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./mysql:/var/lib/mysql
+    expose:
+      - "3306"
+    restart: always
+    environment:
+      MYSQL_DATABASE: island
+      MYSQL_ROOT_PASSWORD: island
+
+  redis:
+    image: redis:6-alpine
+    restart: always
+    volumes:
+      - ./redis:/data
+    expose:
+      - "6379"
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: rabbit
+# It may not work in Windows environment due to permission issues, just comment the "volumes" section.
+#    volumes:
+#      - ./rabbitmq:/var/lib/rabbitmq
+    restart: always
+    expose:
+      - "5672"

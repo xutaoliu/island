@@ -12,6 +12,16 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import datetime
+from django.core.exceptions import ImproperlyConfigured
+
+
+def get_env(env):
+    try:
+        return os.environ[env]
+    except KeyError:
+        error_msg = f'Set the {env} environment variable.'
+        raise ImproperlyConfigured(error_msg)
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,12 +31,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['DJ_SECRET_KEY']
+SECRET_KEY = get_env('DJ_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ['DJ_DEBUG']))
+DEBUG = bool(int(get_env('DJ_DEBUG')))
 
-ALLOWED_HOSTS = os.environ['DJ_ALLOWED_HOSTS'].split(',')
+ALLOWED_HOSTS = get_env('DJ_ALLOWED_HOSTS').split(',')
 
 
 # Application definition
@@ -51,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'island.middlewares.TimezoneMiddleware'
 ]
 
 ROOT_URLCONF = 'island.urls'
@@ -80,9 +91,9 @@ WSGI_APPLICATION = 'island.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ['DJ_DB_NAME'],
-        'USER': os.environ['DJ_DB_USER'],
-        'PASSWORD': os.environ['DJ_DB_PASSWORD'],
+        'NAME': get_env('DJ_DB_NAME'),
+        'USER': get_env('DJ_DB_USER'),
+        'PASSWORD': get_env('DJ_DB_PASSWORD'),
         'HOST': 'mysql',
         'PORT': '3306'
     }
@@ -180,13 +191,13 @@ REST_FRAMEWORK = {
 }
 
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=int(os.environ['DJ_JWT_EXPIRATION_DELTA'])),
-    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=int(os.environ['DJ_JWT_REFRESH_EXPIRATION_DELTA'])),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=int(get_env('DJ_JWT_EXPIRATION_DELTA'))),
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=int(get_env('DJ_JWT_REFRESH_EXPIRATION_DELTA'))),
 }
 
-PROXY_HOST = os.environ['DJ_PROXY_HOST']
-PROXY_PORT = int(os.environ['DJ_PROXY_PORT'])
-PROXY_TYPE = os.environ['DJ_PROXY_TYPE']
+PROXY_HOST = get_env('DJ_PROXY_HOST')
+PROXY_PORT = int(get_env('DJ_PROXY_PORT'))
+PROXY_TYPE = get_env('DJ_PROXY_TYPE')
 
 
 def log_add_ip_attribute(record):
@@ -267,19 +278,19 @@ LOGGING = {
     }
 }
 
-WECHAT_TOKEN = os.environ['DJ_WECHAT_TOKEN']
-WECHAT_AES_KEY = os.environ['DJ_WECHAT_AES_KEY']
-WECHAT_APPID = os.environ['DJ_WECHAT_APPID']
-WECHAT_STATE_TIMEOUT = int(os.environ['DJ_WECHAT_STATE_TIMEOUT'])
+WECHAT_TOKEN = get_env('DJ_WECHAT_TOKEN')
+WECHAT_AES_KEY = get_env('DJ_WECHAT_AES_KEY')
+WECHAT_APPID = get_env('DJ_WECHAT_APPID')
+WECHAT_STATE_TIMEOUT = int(get_env('DJ_WECHAT_STATE_TIMEOUT'))
 
-EMAIL_HOST = os.environ['DJ_EMAIL_HOST']
-EMAIL_PORT = int(os.environ['DJ_EMAIL_PORT'])
-EMAIL_HOST_USER = os.environ['DJ_EMAIL_HOST_USER']
-EMAIL_HOST_PASSWORD = os.environ['DJ_EMAIL_HOST_PASSWORD']
-EMAIL_USE_SSL = bool(int(os.environ['DJ_EMAIL_USE_SSL']))
-EMAIL_USE_TLS = bool(int(os.environ['DJ_EMAIL_USE_TLS']))
+EMAIL_HOST = get_env('DJ_EMAIL_HOST')
+EMAIL_PORT = int(get_env('DJ_EMAIL_PORT'))
+EMAIL_HOST_USER = get_env('DJ_EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = get_env('DJ_EMAIL_HOST_PASSWORD')
+EMAIL_USE_SSL = bool(int(get_env('DJ_EMAIL_USE_SSL')))
+EMAIL_USE_TLS = bool(int(get_env('DJ_EMAIL_USE_TLS')))
 
-RABBITMQ_DEFAULT_USER = os.environ['DJ_RABBITMQ_DEFAULT_USER']
-RABBITMQ_DEFAULT_PASS = os.environ['DJ_RABBITMQ_DEFAULT_PASS']
+RABBITMQ_DEFAULT_USER = get_env('DJ_RABBITMQ_DEFAULT_USER')
+RABBITMQ_DEFAULT_PASS = get_env('DJ_RABBITMQ_DEFAULT_PASS')
 
 CELERY_BROKER_URL = f'amqp://{RABBITMQ_DEFAULT_USER}:{RABBITMQ_DEFAULT_PASS}@rabbitmq:5672'

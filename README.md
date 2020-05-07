@@ -1,6 +1,6 @@
 # Island Server
 
-## Build yourself
+## Build
 
 - `docker build -t missingno/island-env:<version> -f env.Dockerfile .`
 - Change the first line of [Dockerfile](Dockerfile) to `FROM missingno/island-env:<version>`

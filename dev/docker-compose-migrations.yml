@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  island:
+    image: missingno/island
+    volumes:
+      - ./migrations:/app/migrations
+    depends_on:
+      - mysql
+    env_file:
+      # See example.env
+      - test.env
+    entrypoint: "sh ./migrations-entrypoint.sh"
+
+  mysql:
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    expose:
+      - "3306"
+    restart: always
+    environment:
+      MYSQL_DATABASE: island
+      MYSQL_ROOT_PASSWORD: island

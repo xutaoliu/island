@@ -2,13 +2,14 @@
 
 ### User Defined
 
-env/log/*
-env/media/*
-env/mysql/*
-env/redis/*
-env/rabbitmq/*
-env/*.env
-!env/example.env
+dev/log/*
+dev/media/*
+dev/mysql/*
+dev/redis/*
+dev/rabbitmq/*
+dev/migrations/*
+dev/*.env
+!dev/example.env
 
 ### Example user template
 
@@ -120,9 +121,9 @@ celerybeat-schedule
 # Environments
 .env
 .venv
-#env/
+env/
 venv/
-#ENV/
+ENV/
 env.bak/
 venv.bak/
 

@@ -15,8 +15,6 @@ services:
     env_file:
       # See example.env
       - test.env
-# Uncomment the following line to make migrations
-#    entrypoint: "python manage.py makemigrations"
 
   mysql:
     image: mysql:8

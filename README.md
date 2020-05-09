@@ -26,3 +26,8 @@
 
 - `cd dev`
 - `docker-compose up`
+
+## Env Tag
+
+- `v1`: Origin env.
+- `v2`: Change development server to wsgi server(gunicorn).

@@ -259,22 +259,22 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console', 'file', 'mail_admins'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': 'INFO',
             'propagate': True,
         },
         'twitter_image': {
             'handlers': ['console', 'file', 'mail_admins'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': 'INFO',
             'propagate': True,
         },
         'wechat': {
             'handlers': ['console', 'file', 'mail_admins'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': 'INFO',
             'propagate': True,
         },
         'flights': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'handlers': ['console', 'file', 'mail_admins'],
+            'level': 'INFO',
             'propagate': True,
         },
     }

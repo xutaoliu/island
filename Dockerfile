@@ -1,4 +1,4 @@
-FROM missingno/island-env:v2
+FROM missingno/island-env
 
 ADD . /app
 WORKDIR /app

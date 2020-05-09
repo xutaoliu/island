@@ -4,8 +4,7 @@
 
 ### Build Env (When dependencies or [requirements.txt](requirements.txt) were changed)
 
-- `docker build -t missingno/island-env:<version> -f env.Dockerfile .`
-- Change the first line of [Dockerfile](Dockerfile) to `FROM missingno/island-env:<version>`
+- `docker build -t missingno/island-env -f env.Dockerfile .`
 
 ### Build Image
 
@@ -26,8 +25,3 @@
 
 - `cd dev`
 - `docker-compose up`
-
-## Env Tag
-
-- `v1`: Origin env.
-- `v2`: Change development server to wsgi server(gunicorn).

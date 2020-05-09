@@ -10,7 +10,7 @@ services:
     env_file:
       # See example.env
       - test.env
-    entrypoint: "sh ./migrations-entrypoint.sh"
+    entrypoint: "./migrations-entrypoint.sh"
 
   mysql:
     image: mysql:8

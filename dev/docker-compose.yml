@@ -12,10 +12,9 @@ services:
       - mysql
       - redis
       - rabbitmq
-    environment:
-      ENV_FILE: /run/secrets/dj_envs
-    secrets:
-      - dj_envs
+    env_file:
+      # See example.env
+      - test.env
 
   mysql:
     image: mysql:8
@@ -48,8 +47,3 @@ services:
     restart: always
     expose:
       - "5672"
-
-secrets:
-  dj_envs:
-    # See example.env
-    file: test.env

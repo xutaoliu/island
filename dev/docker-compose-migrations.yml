@@ -7,10 +7,9 @@ services:
       - ./migrations:/app/migrations
     depends_on:
       - mysql
-    environment:
-      ENV_FILE: /run/secrets/dj_envs
-    secrets:
-      - dj_envs
+    env_file:
+      # See example.env
+      - test.env
     entrypoint: "./migrations-entrypoint.sh"
 
   mysql:
@@ -22,8 +21,3 @@ services:
     environment:
       MYSQL_DATABASE: island
       MYSQL_ROOT_PASSWORD: island
-
-secrets:
-  dj_envs:
-    # See example.env
-    file: test.env

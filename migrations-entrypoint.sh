@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-export $(egrep -v '^#' $ENV_FILE | xargs)
-
 echo "[Wait for mysql]"
 ./wait-for-it/wait-for-it.sh mysql:3306 --timeout=0
 

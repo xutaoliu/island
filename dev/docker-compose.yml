@@ -40,8 +40,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-alpine
     environment:
-      RABBITMQ_DEFAULT_USER: rabbit
-      RABBITMQ_DEFAULT_PASS: rabbit
+      RABBITMQ_DEFAULT_USER: island
+      RABBITMQ_DEFAULT_PASS: island
 # It may not work in Windows environment due to permission issues, just comment the "volumes" section.
 #    volumes:
 #      - ./rabbitmq:/var/lib/rabbitmq

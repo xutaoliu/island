@@ -1,4 +1,7 @@
 #!/bin/bash
+set -e
+
+export $(egrep -v '^#' $ENV_FILE | xargs)
 
 echo "[Collect static files]"
 python manage.py collectstatic --noinput

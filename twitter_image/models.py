@@ -19,6 +19,7 @@ class Task(models.Model):
     last_update = models.DateTimeField(default=timezone.make_aware(timezone.datetime.utcfromtimestamp(0), timezone=timezone.utc))
 
     def search_tweets(self):
+        tweets = []
         c = twint.Config()
         c.Username = self.username
         c.Since = self.last_update.date().strftime('%Y-%m-%d %H:%M:%S')
@@ -27,13 +28,15 @@ class Task(models.Model):
         c.Proxy_type = settings.PROXY_TYPE
         c.Search = self.tag
         c.Store_object = True
+        c.Store_object_tweets_list = tweets
         twint.run.Search(c)
-        return twint.output.tweets_list
+        return tweets
 
-    def update(self):
+    def update(self, auto_flush_new=True):
         tweets = self.search_tweets()
         logger.info(f'Task {self.id} get tweets: {len(tweets)}')
-        TweetData.objects.filter(new=True).update(new=False)
+        if auto_flush_new:
+            TweetData.objects.filter(new=True).update(new=False)
         for tweet in tweets:
             if not TweetData.objects.filter(id=tweet.id).exists():
                 tweet_data = TweetData.objects.create(id=tweet.id, task=self, tweet=tweet.tweet, time=timezone.make_aware(timezone.datetime.strptime(f'{tweet.datestamp} {tweet.timestamp}', '%Y-%m-%d %H:%M:%S')))

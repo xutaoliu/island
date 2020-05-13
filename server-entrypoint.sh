@@ -20,4 +20,4 @@ echo "[Start celery worker]"
 celery multi start island -A island -l info --logfile=log/celery.log --pidfile=celery.pid
 
 echo "[Starting server]"
-gunicorn --bind=0.0.0.0:8000 island.wsgi
+gunicorn --worker-class=gevent --workers=$GUNICORN_WORKERS --bind=0.0.0.0:8000 island.wsgi

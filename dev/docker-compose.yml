@@ -41,6 +41,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: island
       RABBITMQ_DEFAULT_PASS: island
+      RABBITMQ_DEFAULT_VHOST: island
 # It may not work in Windows environment due to permission issues, just comment the "volumes" section.
 #    volumes:
 #      - ./rabbitmq:/var/lib/rabbitmq

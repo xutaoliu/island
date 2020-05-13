@@ -36,27 +36,41 @@ class Task(models.Model):
         tweets = self.search_tweets()
         logger.info(f'Task {self.id} get tweets: {len(tweets)}')
         if auto_flush_new:
-            TweetData.objects.filter(new=True).update(new=False)
+            self.tweets.filter(new=True).update(new=False)
         for tweet in tweets:
             if not TweetData.objects.filter(id=tweet.id).exists():
-                tweet_data = TweetData.objects.create(id=tweet.id, task=self, tweet=tweet.tweet, time=timezone.make_aware(timezone.datetime.strptime(f'{tweet.datestamp} {tweet.timestamp}', '%Y-%m-%d %H:%M:%S')))
+                tweet_data = TweetData.objects.create(id=tweet.id, tweet=tweet.tweet, time=timezone.make_aware(timezone.datetime.strptime(f'{tweet.datestamp} {tweet.timestamp}', '%Y-%m-%d %H:%M:%S')))
                 for photo in tweet.photos:
                     img_data = ImageData(origin_url=photo, tweet=tweet_data)
                     img_data.update()
                     img_data.save()
+            else:
+                tweet_data = TweetData.objects.get(id=tweet.id)
+                for image in tweet_data.images:
+                    if image.image is None:
+                        image.update()
+                        image.save()
+            TaskTweet.objects.create(task=self, tweet=tweet_data)
 
 
 class TweetData(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='tweets')
     tweet = models.CharField(max_length=200)
     time = models.DateTimeField()
+
+
+class TaskTweet(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='tweets')
+    tweet = models.ForeignKey(TweetData, on_delete=models.CASCADE, related_name='tasks')
     new = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ['task', 'tweet']
 
 
 class ImageData(models.Model):
     origin_url = models.URLField(unique=True)
-    image = models.ImageField(null=True)
+    image = models.ImageField(upload_to='twitter_image', null=True)
     tweet = models.ForeignKey(TweetData, on_delete=models.CASCADE, related_name='images')
 
     def update(self):

@@ -7,6 +7,11 @@ echo "[Wait for mysql]"
 echo "[Make migrations]"
 python manage.py makemigrations --noinput
 
+echo "[Clean old migrations]"
+if [[ -d migrations ]]; then
+  rm -rf migrations/*
+fi
+
 echo "[Copy migrations]"
 for d in *
 do

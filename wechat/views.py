@@ -56,13 +56,13 @@ def serve(request):
         return HttpResponseBadRequest()
 
 
-def process_text(msg):
+def process_text(request, msg):
     user = WechatUser.objects.get(openid=msg.source)
     with transaction.atomic():
         message = Message.objects.create(id=msg.id, user=user, time=msg.create_time, type='text')
         TextMessage.objects.create(message=message, content=msg.content)
     if msg.content in actions.state_functions:
-        reply, data = actions.state_functions[msg.content](user, msg, {}, 0)
+        reply, data = actions.state_functions[msg.content](request, user, msg, {}, 0)
         if data is not None:
             cache.set(f'wechat/{msg.source}/state', {'name': msg.content, 'step': 1, 'data': data},
                       timeout=settings.WECHAT_STATE_TIMEOUT)
@@ -72,7 +72,7 @@ def process_text(msg):
     else:
         state = cache.get(f'wechat/{msg.source}/state')
         if state is not None:
-            reply, data = actions.state_functions[state['name']](user, msg, state['data'], state['step'])
+            reply, data = actions.state_functions[state['name']](request, user, msg, state['data'], state['step'])
             if data is not None:
                 cache.set(f'wechat/{msg.source}/state',
                           {'name': state['name'], 'step': state['step'] + 1, 'data': data},

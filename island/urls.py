@@ -22,7 +22,7 @@ import wechat.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    re_path(r'media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}, name='media'),
     re_path(r'static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     path('api-token/', obtain_jwt_token, name='login'),
     path('api-token/refresh/', refresh_jwt_token),

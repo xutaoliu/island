@@ -1,7 +1,8 @@
 from django.utils import timezone
 from wechat.models import User, WechatUser
 from wechatpy.replies import TextReply
-from twitter_image.models import Task, TweetData
+from twitter_image.models import Task, TaskTweet
+from django.shortcuts import reverse
 from django.contrib.auth.models import Group
 from django.db import transaction
 import logging
@@ -35,17 +36,17 @@ def unsubscribe(msg):
 
 
 @for_state('--help', '显示指令帮助')
-def state_help(user, msg, data, step):
+def state_help(request, user, msg, data, step):
     return TextReply(content='\n'.join([f'{state} - {func.desc}' for state, func in state_functions.items()]), message=msg), None
 
 
 @for_state('--cancel', '取消当前指令')
-def state_cancel(user, msg, data, step):
-    return TextReply(content='Canceled.', message=msg), None
+def state_cancel(request, user, msg, data, step):
+    return TextReply(content='已取消.', message=msg), None
 
 
 @for_state('--bind', '绑定推特账号')
-def state_bind(user, msg, data, step):
+def state_bind(request, user, msg, data, step):
     if step == 0:
         return TextReply(content='Twitter ID:', message=msg), data
     elif step == 1:
@@ -69,7 +70,7 @@ def state_bind(user, msg, data, step):
 
 
 @for_state('--update', '更新照片')
-def state_update(user, msg, data, step):
+def state_update(request, user, msg, data, step):
     with transaction.atomic():
         tasks = Task.objects.select_for_update(skip_locked=True).filter(owner=user.user)
         with timezone.override(None):
@@ -81,11 +82,14 @@ def state_update(user, msg, data, step):
 
 
 @for_state('--imgs', '获取新的照片')
-def state_imgs(user, msg, data, step):
+def state_imgs(request, user, msg, data, step):
     with transaction.atomic():
-        tweets = TweetData.objects.select_for_update().filter(task__owner=user.user, new=True)
+        tweets = TaskTweet.objects.select_for_update().filter(task__owner=user.user, new=True)
         if tweets.exists():
-            urls = tweets.values_list('images__image', flat=True)
+            paths = tweets.values_list('images__image', flat=True)
+            urls = []
+            for path in paths:
+                urls.append(request.build_absolute_uri(reverse('media', kwargs={'path': path})))
             tweets.update(new=False)
             return TextReply(content='\n'.join(urls), message=msg), None
         else:

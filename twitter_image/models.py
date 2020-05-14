@@ -38,6 +38,8 @@ class Task(models.Model):
         if auto_flush_new:
             self.tweets.filter(new=True).update(new=False)
         for tweet in tweets:
+            if self.tweets.filter(tweet__id=tweet.id).exists():
+                continue
             if not TweetData.objects.filter(id=tweet.id).exists():
                 tweet_data = TweetData.objects.create(id=tweet.id, tweet=tweet.tweet, time=timezone.make_aware(timezone.datetime.strptime(f'{tweet.datestamp} {tweet.timestamp}', '%Y-%m-%d %H:%M:%S')))
                 for photo in tweet.photos:
@@ -46,7 +48,7 @@ class Task(models.Model):
                     img_data.save()
             else:
                 tweet_data = TweetData.objects.get(id=tweet.id)
-                for image in tweet_data.images:
+                for image in tweet_data.images.all():
                     if image.image is None:
                         image.update()
                         image.save()

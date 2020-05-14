@@ -6,6 +6,12 @@ from django.shortcuts import reverse
 from django.contrib.auth.models import Group
 from django.db import transaction
 import logging
+from wechat import tasks
+from wechat import views
+from wechatpy.crypto.pkcs7 import PKCS7Encoder
+from wechatpy.utils import to_text, to_binary
+import base64
+from island import settings
 
 logger = logging.getLogger('wechat')
 state_functions = {}
@@ -71,26 +77,21 @@ def state_bind(request, user, msg, data, step):
 
 @for_state('--update', '更新照片')
 def state_update(request, user, msg, data, step):
-    with transaction.atomic():
-        tasks = Task.objects.select_for_update(skip_locked=True).filter(owner=user.user)
-        with timezone.override(None):
-            for task in tasks:
-                task.update(auto_flush_new=False)
-                task.last_update = timezone.now()
-                task.save()
+    tasks.update_task.delay(user.user.id)
     return TextReply(content='更新中...\n请使用--imgs获取新照片', message=msg), None
 
 
 @for_state('--imgs', '获取新的照片')
 def state_imgs(request, user, msg, data, step):
     with transaction.atomic():
-        tweets = TaskTweet.objects.select_for_update().filter(task__owner=user.user, new=True)
+        tweets = TaskTweet.objects.select_for_update(skip_locked=True).filter(task__owner=user.user, new=True)
         if tweets.exists():
-            paths = tweets.values_list('images__image', flat=True)
-            urls = []
-            for path in paths:
-                urls.append(request.build_absolute_uri(reverse('media', kwargs={'path': path})))
+            ids = tweets.values_list('tweet__images__id', flat=True)
+            content = to_binary(settings.WECHAT_TOKEN + ','.join(map(str, ids)))
+            cipher_text = views.imgs_cipher.encrypt(PKCS7Encoder.encode(content))
+            encoded = to_text(base64.b64encode(cipher_text))
+            url = request.build_absolute_uri(reverse('wechat_imgs', kwargs={'imgs': encoded}))
             tweets.update(new=False)
-            return TextReply(content='\n'.join(urls), message=msg), None
+            return TextReply(content=url, message=msg), None
         else:
             return TextReply(content='还没有获取到照片，请稍后再试', message=msg), None

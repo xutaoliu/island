@@ -2,18 +2,46 @@ from django.db import transaction
 from wechatpy.utils import check_signature
 from island import settings
 from wechatpy.exceptions import InvalidSignatureException, InvalidAppIdException
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, Http404
 from wechatpy import parse_message
 from wechatpy.crypto import WeChatCrypto
+from wechatpy.crypto.cryptography import WeChatCipher
+from wechatpy.crypto.pkcs7 import PKCS7Encoder
+from wechatpy.utils import to_text
 from wechatpy.replies import EmptyReply
 from django.views.decorators.csrf import csrf_exempt
 from wechat.models import WechatUser, Message, TextMessage
+from twitter_image.models import ImageData
 import logging
+import base64
 from django.core.cache import cache
+from django.shortcuts import render, reverse
 from wechat import actions
 
 logger = logging.getLogger('wechat')
 crypto = WeChatCrypto(settings.WECHAT_TOKEN, settings.WECHAT_AES_KEY, settings.WECHAT_APPID)
+imgs_cipher = WeChatCipher(crypto.key)
+
+
+def serve_imgs(request, imgs):
+    if request.method == 'GET':
+        try:
+            plain_imgs = imgs_cipher.decrypt(base64.b64decode(imgs))
+            content = to_text(PKCS7Encoder.decode(plain_imgs))
+            token = content[:len(settings.WECHAT_TOKEN)]
+            if token != settings.WECHAT_TOKEN:
+                raise Exception('Invalid token.')
+            img_ids = list(map(int, content[len(settings.WECHAT_TOKEN):].split(',')))
+        except:
+            return HttpResponseBadRequest()
+        paths = ImageData.objects.filter(id__in=img_ids).values_list('image', flat=True)
+        if paths.exists():
+            urls = [reverse('media', kwargs={'path': path}) for path in paths]
+            return render(request, 'imgs.html', {'imgs': urls})
+        else:
+            return Http404()
+    else:
+        return HttpResponseBadRequest()
 
 
 @csrf_exempt
@@ -40,7 +68,7 @@ def serve(request):
         msg = parse_message(decrypted_xml)
         reply = None
         if msg.type == 'text':
-            reply = process_text(msg)
+            reply = process_text(request, msg)
         elif msg.type == 'event':
             if msg.event == 'subscribe':
                 reply = actions.subscribe(msg)

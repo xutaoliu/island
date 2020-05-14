@@ -18,7 +18,6 @@ from django.contrib import admin
 from django.urls import path, re_path, include
 from django.views.static import serve
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
-import wechat.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,5 +26,5 @@ urlpatterns = [
     path('api-token/', obtain_jwt_token, name='login'),
     path('api-token/refresh/', refresh_jwt_token),
     path('twitter_image/', include('twitter_image.urls')),
-    path('wechat/', wechat.views.serve),
+    path('wechat/', include('wechat.urls')),
 ]

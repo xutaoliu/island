@@ -44,7 +44,8 @@ class Task(models.Model):
                 tweet_data = TweetData.objects.create(id=tweet.id, tweet=tweet.tweet, time=timezone.make_aware(timezone.datetime.strptime(f'{tweet.datestamp} {tweet.timestamp}', '%Y-%m-%d %H:%M:%S')))
                 for photo in tweet.photos:
                     img_data = ImageData(origin_url=photo, tweet=tweet_data)
-                    img_data.update()
+                    if not img_data.update():
+                        img_data.update()  # try again.
                     img_data.save()
             else:
                 tweet_data = TweetData.objects.get(id=tweet.id)

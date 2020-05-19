@@ -51,11 +51,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_jwt',
     'django_filters',
+    'system',
     'twitter_image',
     'wechat'
 ]
 
 MIDDLEWARE = [
+    'island.middlewares.SuspiciousExceptionMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -272,7 +274,7 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-        'flights': {
+        'middleware': {
             'handlers': ['console', 'file', 'mail_admins'],
             'level': 'INFO',
             'propagate': True,
@@ -296,3 +298,6 @@ RABBITMQ_USER = get_env('DJ_RABBITMQ_USER')
 RABBITMQ_PASS = get_env('DJ_RABBITMQ_PASS')
 
 CELERY_BROKER_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASS}@rabbitmq:5672/island'
+
+SUSPICIOUS_BLOCK_TIMEOUT = int(get_env('DJ_SUSPICIOUS_BLOCK_TIMEOUT'))
+SUSPICIOUS_BLOCK_FREQUENCY = int(get_env('DJ_SUSPICIOUS_BLOCK_FREQUENCY'))

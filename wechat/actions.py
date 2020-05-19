@@ -66,7 +66,7 @@ def state_bind(request, user, msg, data, step):
         with transaction.atomic():
             tasks = Task.objects.select_for_update().filter(owner=user.user)
             if tasks.exists():
-                tasks.update(username=data['twitter_id'], tag=msg.content, last_update=timezone.make_aware(timezone.datetime.utcfromtimestamp(0), timezone=timezone.utc))
+                tasks.update(username=data['twitter_id'], tag=msg.content, last_update=timezone.now())
             else:
                 Task.objects.create(username=data['twitter_id'], tag=msg.content, owner=user.user)
         return TextReply(content='Bind success.', message=msg), None
@@ -87,7 +87,7 @@ def state_imgs(request, user, msg, data, step):
         tweets = TaskTweet.objects.select_for_update(skip_locked=True).filter(task__owner=user.user, new=True)
         if tweets.exists():
             ids = tweets.values_list('tweet__images__id', flat=True)
-            content = to_binary(settings.WECHAT_TOKEN + ','.join(map(str, ids)))
+            content = to_binary(settings.WECHAT_TOKEN + ','.join(map(lambda x: '' if x is None else str(x), ids)))
             cipher_text = views.imgs_cipher.encrypt(PKCS7Encoder.encode(content))
             encoded = to_text(base64.b64encode(cipher_text))
             url = request.build_absolute_uri(reverse('wechat_imgs', kwargs={'imgs': encoded}))

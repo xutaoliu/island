@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'django_filters',
     'system',
     'twitter_image',
-    'wechat'
+    'wechat',
+    'proxy',
 ]
 
 MIDDLEWARE = [
@@ -274,6 +275,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+        'proxy': {
+            'handlers': ['console', 'file', 'mail_admins'],
+            'level': 'INFO',
+            'propagate': True,
+        },
         'middleware': {
             'handlers': ['console', 'file', 'mail_admins'],
             'level': 'INFO',
@@ -301,3 +307,5 @@ CELERY_BROKER_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASS}@rabbitmq:5672/islan
 
 SUSPICIOUS_BLOCK_TIMEOUT = int(get_env('DJ_SUSPICIOUS_BLOCK_TIMEOUT'))
 SUSPICIOUS_BLOCK_FREQUENCY = int(get_env('DJ_SUSPICIOUS_BLOCK_FREQUENCY'))
+
+PROXY_CHECK_URL = get_env('DJ_PROXY_CHECK_URL')

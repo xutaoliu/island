@@ -12,7 +12,7 @@ logger = logging.getLogger('proxy')
 
 @shared_task
 def process_proxy():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq',
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', virtual_host='crawler',
                                                                    credentials=pika.PlainCredentials(
                                                                        settings.RABBITMQ_USER,
                                                                        settings.RABBITMQ_PASS)))

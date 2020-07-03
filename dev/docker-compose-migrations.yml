@@ -7,6 +7,7 @@ services:
       - ./migrations:/app/migrations
     depends_on:
       - mysql
+      - rabbitmq
     env_file:
       # See example.env
       - test.env
@@ -21,3 +22,13 @@ services:
     environment:
       MYSQL_DATABASE: island
       MYSQL_ROOT_PASSWORD: island
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: island
+      RABBITMQ_DEFAULT_PASS: island
+      RABBITMQ_DEFAULT_VHOST: island
+    restart: always
+    expose:
+      - "5672"

@@ -35,8 +35,8 @@ services:
       - ./redis:/data
     expose:
       - "6379"
-    networks:
-      - rabbitmq
+#    networks:
+#      - rabbitmq
 
   rabbitmq:
     image: rabbitmq:3-alpine

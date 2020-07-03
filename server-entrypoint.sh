@@ -17,7 +17,10 @@ echo "[Apply database migrations]"
 python manage.py migrate --noinput
 
 echo "[Start celery worker]"
-celery multi start island -A island -l info --logfile=log/celery.log --pidfile=celery.pid
+celery worker -A island --detach -l info --logfile=log/celery.log --pidfile=celery.pid
+
+echo "[Start celery beat]"
+celery beat -A island --detach -S django -l info --logfile=log/celerybeat.log --pidfile=celerybeat.pid
 
 echo "[Starting server]"
 gunicorn --worker-class=gevent --workers=$GUNICORN_WORKERS --bind=0.0.0.0:8000 island.wsgi

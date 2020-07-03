@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_jwt',
     'django_filters',
+    'django_celery_beat',
     'system',
     'twitter_image',
     'wechat',

@@ -27,6 +27,7 @@ def process_proxy():
                 'https': f'{item["protocol"]}://{item["ip"]}:{item["port"]}'
             }, timeout=5)
             if result.status_code == 200:
+                logger.info(f'[Discover] Valid Proxy {item["ip"]}:{item["port"]}.')
                 Proxy.objects.get_or_create(ip=item['ip'], port=item['port'], protocol=item['protocol'],
                                             anonymity=item['anonymity'], site=item['site'], location=item['location'],
                                             delay=result.elapsed.total_seconds())
@@ -36,8 +37,10 @@ def process_proxy():
                                                        'interval': schedule,
                                                        'task': 'proxy.tasks.check_proxy',
                                                        'kwargs': json.dumps({'ip': item['ip'], 'port': item['port']})})
+            else:
+                logger.info(f'[Discover] Invalid Proxy {item["ip"]}:{item["port"]}.')
         except requests.exceptions.RequestException:
-            pass
+            logger.info(f'[Discover] Invalid Proxy {item["ip"]}:{item["port"]}.')
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     channel.basic_qos(prefetch_count=2)
@@ -51,6 +54,7 @@ def check_proxy(ip, port):
         proxy = Proxy.objects.get(ip=ip, port=port)
     except Proxy.DoesNotExist:
         PeriodicTask.objects.filter(name=f'proxy-{ip}:{port}').delete()
+        logger.info(f'[Check] Proxy {ip}:{port} DoesNotExist, PeriodicTask deleted.')
     else:
         try:
             result = requests.get(settings.PROXY_CHECK_URL, proxies={
@@ -60,9 +64,11 @@ def check_proxy(ip, port):
             if result.status_code == 200:
                 proxy.delay = result.elapsed.total_seconds()
                 proxy.save()
+                logger.info(f'[Check] Proxy {ip}:{port} OK.')
             else:
                 raise requests.exceptions.RequestException(response=result)
         except requests.exceptions.RequestException:
             proxy.delay = -1
             proxy.save()
             PeriodicTask.objects.filter(name=f'proxy-{ip}:{port}').delete()
+            logger.info(f'[Check] Proxy {ip}:{port} Timeout, PeriodicTask deleted.')

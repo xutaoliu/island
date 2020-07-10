@@ -28,15 +28,21 @@ def process_proxy():
             }, timeout=5)
             if result.status_code == 200:
                 logger.info(f'[Discover] Valid Proxy {item["ip"]}:{item["port"]}.')
-                Proxy.objects.get_or_create(ip=item['ip'], port=item['port'], protocol=item['protocol'],
-                                            anonymity=item['anonymity'], site=item['site'], location=item['location'],
-                                            delay=result.elapsed.total_seconds())
+                Proxy.objects.get_or_create(ip=item['ip'], port=item['port'],
+                                            defaults={
+                                                'protocol': item['protocol'],
+                                                'anonymity': item['anonymity'],
+                                                'site': item['site'],
+                                                'location': item['location'],
+                                                'delay': result.elapsed.total_seconds()
+                                            })
                 schedule, created = IntervalSchedule.objects.get_or_create(every=1, period=IntervalSchedule.MINUTES)
                 PeriodicTask.objects.get_or_create(name=f'proxy-{item["ip"]}:{item["port"]}',
                                                    defaults={
                                                        'interval': schedule,
                                                        'task': 'proxy.tasks.check_proxy',
-                                                       'kwargs': json.dumps({'ip': item['ip'], 'port': item['port']})})
+                                                       'kwargs': json.dumps({'ip': item['ip'], 'port': item['port']})
+                                                   })
             else:
                 logger.info(f'[Discover] Invalid Proxy {item["ip"]}:{item["port"]}.')
         except requests.exceptions.RequestException:
